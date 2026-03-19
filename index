@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GL Foundations Assessment</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:#0d1117; --surface:#161b22; --surface2:#1c2230; --border:#2a3245;
+  --orange:#E8681A; --navy:#1E2D4A; --text:#e2e8f0; --muted:#64748b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;overflow-x:hidden;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;}
+.header{width:100%;background:var(--surface);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:12px;}
+.hbrand{font-family:'DM Serif Display',serif;font-size:17px;color:var(--orange);}
+.hsub{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.07em;text-transform:uppercase;margin-top:2px;}
+.twrap{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;flex-shrink:0;}
+.tlbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-family:'DM Mono',monospace;}
+#timer{font-family:'DM Mono',monospace;font-size:19px;font-weight:500;color:var(--orange);min-width:50px;text-align:center;}
+#timer.warn{color:#f59e0b;}
+#timer.danger{color:#ef4444;animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.progwrap{width:100%;height:3px;background:var(--border);}
+.progfill{height:100%;background:var(--orange);transition:width .4s ease;}
+.container{width:100%;max-width:760px;padding:28px 16px 60px;}
+.screen{display:none;flex-direction:column;gap:24px;animation:fadeUp .4s ease;}
+.screen.active{display:flex;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.badge{font-family:'DM Mono',monospace;font-size:10px;color:var(--orange);text-transform:uppercase;letter-spacing:.12em;border:1px solid var(--orange);border-radius:4px;padding:4px 10px;display:inline-block;}
+.ititle{font-family:'DM Serif Display',serif;font-size:32px;line-height:1.15;}
+.ititle em{color:var(--orange);font-style:italic;}
+.idesc{font-size:14px;color:#94a3b8;line-height:1.7;}
+.stats{display:flex;gap:10px;flex-wrap:wrap;}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;flex:1;min-width:80px;}
+.sval{font-family:'DM Serif Display',serif;font-size:24px;color:var(--orange);}
+.slbl{font-size:11px;color:var(--muted);margin-top:4px;}
+.fwrap{display:flex;flex-direction:column;gap:14px;width:100%;max-width:420px;}
+.flbl{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;display:block;}
+.finput{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;outline:none;width:100%;-webkit-appearance:none;}
+.finput:focus{border-color:var(--orange);}
+.ferr{display:none;color:#ef4444;font-size:12px;margin-top:5px;font-family:'DM Mono',monospace;}
+.btn{border:none;border-radius:8px;padding:13px 28px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:opacity .2s;-webkit-tap-highlight-color:transparent;}
+.btnp{background:var(--orange);color:white;}
+.btnp:hover{opacity:.88;}
+.btnp:active{opacity:.75;}
+.btnp:disabled{opacity:.35;cursor:not-allowed;}
+.qhdr{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.qcat{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:4px 10px;border-radius:4px;background:var(--surface2);color:#94a3b8;border:1px solid var(--border);}
+.qnum{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);}
+.qcard{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px 20px;display:flex;flex-direction:column;gap:20px;}
+.qscen{background:var(--surface2);border-left:3px solid var(--orange);border-radius:0 8px 8px 0;padding:12px 14px;font-size:13px;color:#94a3b8;line-height:1.6;font-style:italic;}
+.qtext{font-family:'DM Serif Display',serif;font-size:19px;line-height:1.4;}
+.opts{display:flex;flex-direction:column;gap:10px;}
+.opt{background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:14px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;text-align:left;display:flex;align-items:flex-start;gap:12px;transition:border-color .15s,background .15s;line-height:1.5;width:100%;-webkit-tap-highlight-color:transparent;}
+.opt:hover{border-color:var(--orange);background:rgba(232,104,26,.06);}
+.opt:active{background:rgba(232,104,26,.12);}
+.opt.sel{border-color:var(--orange);background:rgba(232,104,26,.1);}
+.olttr{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);background:var(--surface);border-radius:4px;padding:2px 7px;min-width:22px;text-align:center;margin-top:2px;flex-shrink:0;}
+.opt.sel .olttr{background:var(--orange);color:white;}
+.nav{display:flex;justify-content:flex-end;}
+.nav .btn{width:100%;}
+.rcard{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px 20px;display:flex;flex-direction:column;gap:16px;}
+@media(min-width:560px){
+  .container{padding:36px 24px 80px;}
+  .ititle{font-size:36px;}
+  .qcard{padding:28px;}
+  .qtext{font-size:21px;}
+  .nav .btn{width:auto;}
+  .header{padding:14px 28px;}
+  #timer{font-size:21px;}
+}
+@media(min-width:760px){
+  .container{padding:40px 24px 80px;}
+  .ititle{font-size:38px;}
+  .qcard{padding:32px;}
+  .header{padding:16px 32px;}
+  #timer{font-size:22px;}
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <div class="hbrand">Javro</div>
+    <div class="hsub">GL Foundations · Level 1</div>
+  </div>
+  <div class="twrap">
+    <div class="tlbl">Time</div>
+    <div id="timer">10:00</div>
+  </div>
+</div>
+<div class="progwrap"><div class="progfill" id="prog" style="width:0%"></div></div>
+<div class="container">
+
+  <div class="screen active" id="s-intro">
+    <span class="badge">Candidate Assessment · Level 1 · 2026</span>
+    <div class="ititle">GL Bookkeeping<br/><em>Foundations</em> Assessment</div>
+    <div class="idesc">This assessment evaluates your foundational knowledge of general ledger bookkeeping and accounting principles. Work independently — the timer is limited. No hints or answer guides are provided.</div>
+    <div class="stats">
+      <div class="stat"><div class="sval">15</div><div class="slbl">Questions</div></div>
+      <div class="stat"><div class="sval">10 min</div><div class="slbl">Time Limit</div></div>
+      <div class="stat"><div class="sval">MC Only</div><div class="slbl">Format</div></div>
+    </div>
+    <div class="fwrap">
+      <div>
+        <label class="flbl">Full Name</label>
+        <input class="finput" id="cname" type="text" placeholder="Jane Smith" autocomplete="name"
+          oninput="clearErr('cname','name-err')"/>
+        <div class="ferr" id="name-err">✗ Full name is required before starting.</div>
+      </div>
+      <div>
+        <label class="flbl">Email Address</label>
+        <input class="finput" id="cemail" type="email" placeholder="jane@email.com" autocomplete="email"
+          oninput="clearErr('cemail','email-err')"/>
+        <div class="ferr" id="email-err">✗ A valid email address is required before starting.</div>
+      </div>
+      <div>
+        <label class="flbl">Date</label>
+        <input class="finput" id="cdate" type="text" placeholder="e.g. March 19, 2026"
+          oninput="clearErr('cdate','date-err')"/>
+        <div class="ferr" id="date-err">✗ Date is required before starting.</div>
+      </div>
+    </div>
+    <button class="btn btnp" onclick="start()">Begin Assessment →</button>
+  </div>
+
+  <div class="screen" id="s-question">
+    <div class="qhdr">
+      <div class="qcat" id="qcat">Category</div>
+      <div class="qnum" id="qnum">Q 1 / 15</div>
+    </div>
+    <div class="qcard">
+      <div class="qscen" id="qscen" style="display:none"></div>
+      <div class="qtext" id="qtext"></div>
+      <div class="opts" id="qopts"></div>
+    </div>
+    <div class="nav">
+      <button class="btn btnp" id="btnn" disabled onclick="next()">Next →</button>
+    </div>
+  </div>
+
+  <div class="screen" id="s-results">
+    <div class="rcard">
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--orange);text-transform:uppercase;letter-spacing:.12em;">✦ Assessment Complete</div>
+      <div style="font-family:'DM Serif Display',serif;font-size:30px;line-height:1.2;margin-top:8px;">Thank you for completing the assessment.</div>
+      <div style="font-size:14px;color:#94a3b8;line-height:1.8;margin-top:8px;">Your responses have been submitted to the Javro team for review. If your qualifications are a strong match, a team member will be in touch with next steps.<br/><br/>We appreciate your time and interest in working with Javro.</div>
+      <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);margin-top:12px;" id="rname"></div>
+    </div>
+  </div>
+
+</div>
+<script>
+// ── This URL points to your Apps Script backend ────────────────────────────
+const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbzuUo8Sop6bSY05aMFT6Me5FF7arh4sqIBtbYrROQFZbwE7vRH9Ec_FqVUU608g1tUnow/exec';
+
+const Qs = [
+  { cat:'Accounting Fundamentals', scen:null,
+    text:'What is the accounting equation?',
+    opts:['Assets = Liabilities + Equity','Assets + Liabilities = Equity','Assets + Profit = Equity','Assets = Profit – Liabilities'], ans:0 },
+  { cat:'Financial Statements', scen:null,
+    text:'The Statement of Profit and Loss is also called the:',
+    opts:['Balance Sheet','Statement of Cash Flows','Statement of Financial Position','Income Statement'], ans:3 },
+  { cat:'Financial Statements', scen:null,
+    text:'Which financial statement shows a company\'s financial position at a specific point in time?',
+    opts:['Income Statement','Statement of Cash Flows','Statement of Retained Earnings','Balance Sheet'], ans:3 },
+  { cat:'Financial Statements', scen:null,
+    text:'Which of the following is NOT a core financial statement?',
+    opts:['Balance Sheet','Trial Balance','Statement of Cash Flows','Income Statement'], ans:1 },
+  { cat:'Accounting Concepts', scen:null,
+    text:'A company using cash basis accounting will:',
+    opts:['Record revenue when earned','Record revenue when collected','Record revenue at the same time as accounts receivable','Record bad debt expense on the income statement'], ans:1 },
+  { cat:'Accounting Concepts', scen:null,
+    text:'An accrued expense is an expense that is:',
+    opts:['Paid but not yet incurred','Incurred and paid','Incurred but not paid','Not reasonably estimable'], ans:2 },
+  { cat:'Balance Sheet', scen:null,
+    text:'Which of the following is NOT a current asset?',
+    opts:['Cash','Property, Plant & Equipment','Inventory','Accounts Receivable'], ans:1 },
+  { cat:'Accounting Concepts', scen:null,
+    text:'Under the accrual basis of accounting, when are liabilities recorded?',
+    opts:['When paid','At the end of the fiscal year','When bank accounts are reconciled','When incurred'], ans:3 },
+  { cat:'Journal Entries',
+    scen:'A vendor invoice for $1,200 was previously recorded as Accounts Payable. The company is now paying it with cash.',
+    text:'Which journal entry correctly records this payment under accrual accounting?',
+    opts:['Debit Expense $1,200 / Credit Cash $1,200','Debit Cash $1,200 / Credit Accounts Payable $1,200','Debit Revenue $1,200 / Credit Accounts Receivable $1,200','Debit Accounts Payable $1,200 / Credit Cash $1,200'], ans:3 },
+  { cat:'Multi-Entity Management',
+    scen:'You manage bookkeeping for four business clients. It is month-end and all four need reconciliations by Friday. Client A has an $8,400 discrepancy blocking payroll processing today. Clients B, C, and D have standard items.',
+    text:'How do you prioritize?',
+    opts:['Work alphabetically — consistency matters more than urgency','Escalate all four to a supervisor and wait for direction','Complete B, C, D first since they are straightforward','Resolve Client A\'s payroll-blocking issue first, then batch B–D by deadline'], ans:3 },
+  { cat:'Balance Sheet', scen:null,
+    text:'A company makes sales of $500 — $300 paid in cash, $200 sold on credit. What is the balance sheet impact?',
+    opts:['$300 credit in cash; $200 credit in A/R; $500 debit in retained earnings','$300 debit in cash; $200 debit in accounts payable; $500 credit in retained earnings','$300 debit in cash; $200 debit in accounts receivable; $500 credit in retained earnings','$300 credit in cash; $200 credit in accounts payable; $500 debit in retained earnings'], ans:2 },
+  { cat:'Bank Reconciliation',
+    scen:'Cash Book balance: $1,200. Bank statement: $1,800. Outstanding checks: $960. Deposit in transit: $200. Bank interest earned: $40. NSF (returned) check: $150. Bank service charges: $50.',
+    text:'What is the correct reconciled balance for the balance sheet?',
+    opts:['$1,040','$1,360','$1,200','$1,800'], ans:0 },
+  { cat:'Technology & Tools', scen:null,
+    text:'Which solution is MOST effective for a remote bookkeeping team managing multiple clients with shared document access needs?',
+    opts:['QuickBooks Online + Google Drive or SharePoint','QuickBooks Desktop (locally installed) + USB flash drives','Spreadsheet-only workflow in Excel on individual computers','Email-based invoice routing with no centralized software'], ans:0 },
+  { cat:'Chart of Accounts', scen:null,
+    text:'A business owner asks you to record $4,500 in annual state licensing fees. Which account classification is MOST appropriate?',
+    opts:['Cost of Goods Sold (COGS)','Operating Expense — Licenses & Permits','Capital Expenditure (Asset)','Owner\'s Draw / Distribution'], ans:1 },
+  { cat:'Decision Making',
+    scen:'It is 4:45 PM on the last business day of the month. You have 15 minutes left with three tasks: (1) post 6 unrecorded vendor bills totaling $18,000, (2) send a client their monthly P&L report, (3) reconcile a $45 petty cash discrepancy.',
+    text:'What is the correct order of priority?',
+    opts:['Petty cash → vendor bills → P&L report','P&L report → petty cash → vendor bills','Vendor bills ($18,000) → P&L report → petty cash','All three are equal — complete the fastest first'], ans:2 },
+];
+
+let cur=0, sel=Array(Qs.length).fill(null), tmr, secs=600, cName='', cEmail='', cDate='';
+
+function clearErr(inputId, errId){
+  document.getElementById(inputId).style.borderColor='var(--border)';
+  document.getElementById(errId).style.display='none';
+}
+
+function start(){
+  const nameVal  = document.getElementById('cname').value.trim();
+  const emailVal = document.getElementById('cemail').value.trim();
+  const dateVal  = document.getElementById('cdate').value.trim();
+  const emailOk  = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal);
+  let valid = true;
+
+  if(!nameVal){
+    document.getElementById('cname').style.borderColor='#ef4444';
+    document.getElementById('name-err').style.display='block';
+    valid=false;
+  }
+  if(!emailVal || !emailOk){
+    document.getElementById('cemail').style.borderColor='#ef4444';
+    document.getElementById('email-err').style.display='block';
+    valid=false;
+  }
+  if(!dateVal){
+    document.getElementById('cdate').style.borderColor='#ef4444';
+    document.getElementById('date-err').style.display='block';
+    valid=false;
+  }
+  if(!valid) return;
+
+  cName  = nameVal;
+  cEmail = emailVal;
+  cDate  = dateVal;
+  show('s-question');
+  tmr = setInterval(tick, 1000);
+  render();
+}
+
+function tick(){
+  secs--;
+  const el=document.getElementById('timer');
+  el.textContent=Math.floor(secs/60)+':'+(secs%60).toString().padStart(2,'0');
+  el.className=secs<=60?'danger':secs<=120?'warn':'';
+  if(secs<=0){clearInterval(tmr);finish();}
+}
+
+function render(){
+  const q=Qs[cur];
+  document.getElementById('qcat').textContent=q.cat;
+  document.getElementById('qnum').textContent='Q '+(cur+1)+' / '+Qs.length;
+  document.getElementById('qtext').textContent=q.text;
+  const sc=document.getElementById('qscen');
+  if(q.scen){sc.textContent=q.scen;sc.style.display='block';}else{sc.style.display='none';}
+  const o=document.getElementById('qopts');
+  o.innerHTML='';
+  ['A','B','C','D'].forEach(function(l,i){
+    const b=document.createElement('button');
+    b.className='opt'+(sel[cur]===i?' sel':'');
+    b.innerHTML='<span class="olttr">'+l+'</span>'+q.opts[i];
+    b.onclick=function(){pick(i);};
+    o.appendChild(b);
+  });
+  document.getElementById('btnn').disabled=sel[cur]===null;
+  document.getElementById('prog').style.width=(cur/Qs.length*100)+'%';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function pick(i){
+  sel[cur]=i;
+  document.querySelectorAll('.opt').forEach(function(b,idx){
+    b.classList.toggle('sel', idx===i);
+  });
+  document.getElementById('btnn').disabled=false;
+}
+
+function next(){
+  cur++;
+  if(cur>=Qs.length){finish();return;}
+  const s=document.getElementById('s-question');
+  s.style.animation='none';
+  void s.offsetWidth;
+  s.style.animation='fadeUp .35s ease';
+  render();
+}
+
+function finish(){
+  clearInterval(tmr);
+  document.getElementById('prog').style.width='100%';
+  const correct=Qs.filter(function(q,i){return sel[i]===q.ans;}).length;
+  const pct=correct/Qs.length;
+  var skill, steps;
+  if(pct>=.87){
+    skill='Strong Foundation';
+    steps=['Advance to phone/video screening interview.','Your detailed results will be reviewed by the hiring manager prior to your interview.','Expect follow-up within 2–3 business days.'];
+  } else if(pct>=.67){
+    skill='Developing — Some Gaps';
+    steps=['A follow-up conversation may be scheduled to explore specific topic areas.','Review core GL concepts: journal entries, financial statements, and reconciliation.','Expect follow-up within 3–5 business days.'];
+  } else if(pct>=.47){
+    skill='Foundational Gaps — Training Recommended';
+    steps=['We recommend additional GL coursework before re-assessment.','Focus areas: debits/credits, accrual accounting, and financial statement structure.','You may be considered for a structured entry-level or training track.'];
+  } else {
+    skill='Not Yet Ready';
+    steps=['We recommend completing a bookkeeping fundamentals course before reapplying.','Consider: QuickBooks Online Certification or an introductory accounting course.','You are welcome to reapply after completing targeted training.'];
+  }
+  document.getElementById('rname').textContent=cName+' · '+cEmail+'  ·  '+cDate;
+  show('s-results');
+  sendToBackend(correct, pct, skill, steps);
+}
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function sendToBackend(score, pct, skill, steps){
+  const L=['A','B','C','D'];
+  const summary=Qs.map(function(q,i){
+    const chosen=sel[i]!==null?L[sel[i]]:'—';
+    const result=sel[i]===q.ans?'✓ CORRECT':'✗ INCORRECT';
+    return 'Q'+(i+1)+' ['+q.cat+']: Answered '+chosen+' | Correct: '+L[q.ans]+' | '+result;
+  }).join('\n');
+
+  const params={
+    candidate_name: cName,
+    candidate_email: cEmail,
+    date_taken: cDate,
+    assessment: 'GL Bookkeeping Foundations — Level 1',
+    score: score,
+    total: Qs.length,
+    percentage: Math.round(pct*100)+'%',
+    skill_level: skill,
+    next_steps: steps.join(' | '),
+    question_summary: summary,
+    open_responses: ''
+  };
+
+  fetch(BACKEND_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(params)
+  }).then(function(){
+    console.log('Submitted successfully');
+  }).catch(function(err){
+    console.error('Submission error:', err);
+  });
+}
+</script>
+</body>
+</html>
