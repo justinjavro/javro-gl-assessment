@@ -201,11 +201,10 @@ const Qs = [
   { cat:'Chart of Accounts', scen:null,
     text:'A business owner asks you to record $4,500 in annual state licensing fees. Which account classification is MOST appropriate?',
     opts:['Cost of Goods Sold (COGS)','Operating Expense — Licenses & Permits','Capital Expenditure (Asset)','Owner\'s Draw / Distribution'], ans:1 },
-  { cat:'Decision Making',
-    scen:'It is 4:45 PM on the last business day of the month. You have 15 minutes left with three tasks: (1) post 6 unrecorded vendor bills totaling $18,000, (2) send a client their monthly P&L report, (3) reconcile a $45 petty cash discrepancy.',
-    text:'What is the correct order of priority?',
-    opts:['Petty cash → vendor bills → P&L report','P&L report → petty cash → vendor bills','Vendor bills ($18,000) → P&L report → petty cash','All three are equal — complete the fastest first'], ans:2 },
-];
+  { cat: 'Decision Making',
+    scen: 'While posting month-end entries, you encounter a $12,000 transaction you are unsure how to classify. The close deadline is in 2 hours.',
+    text: 'What is the most appropriate course of action?',
+    opts: ['Make your best guess and post it — it can be fixed later','Skip it and complete the close without it','Post it to a suspense account and immediately flag it to your supervisor with full context','Wait until the next business day to research the correct treatment'], ans: 2 },
 
 let cur=0, sel=Array(Qs.length).fill(null), tmr, secs=600, cName='', cEmail='', cDate='', startTime=null;
 
