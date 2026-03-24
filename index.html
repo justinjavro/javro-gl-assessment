@@ -152,7 +152,6 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 
 </div>
 <script>
-// ── This URL points to your Apps Script backend ────────────────────────────
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbzuUo8Sop6bSY05aMFT6Me5FF7arh4sqIBtbYrROQFZbwE7vRH9Ec_FqVUU608g1tUnow/exec';
 
 const Qs = [
@@ -207,7 +206,7 @@ const Qs = [
     opts:['Petty cash → vendor bills → P&L report','P&L report → petty cash → vendor bills','Vendor bills ($18,000) → P&L report → petty cash','All three are equal — complete the fastest first'], ans:2 },
 ];
 
-let cur=0, sel=Array(Qs.length).fill(null), tmr, secs=600, cName='', cEmail='', cDate='';
+let cur=0, sel=Array(Qs.length).fill(null), tmr, secs=600, cName='', cEmail='', cDate='', startTime=null;
 
 function clearErr(inputId, errId){
   document.getElementById(inputId).style.borderColor='var(--border)';
@@ -241,6 +240,7 @@ function start(){
   cName  = nameVal;
   cEmail = emailVal;
   cDate  = dateVal;
+  startTime = new Date();
   show('s-question');
   tmr = setInterval(tick, 1000);
   render();
@@ -296,6 +296,11 @@ function next(){
 function finish(){
   clearInterval(tmr);
   document.getElementById('prog').style.width='100%';
+  const endTime = new Date();
+  const elapsed = Math.floor((endTime - startTime) / 1000);
+  const mins = Math.floor(elapsed / 60);
+  const secs2 = elapsed % 60;
+  const timeTaken = mins + ' min ' + secs2 + ' sec';
   const correct=Qs.filter(function(q,i){return sel[i]===q.ans;}).length;
   const pct=correct/Qs.length;
   var skill, steps;
@@ -312,9 +317,9 @@ function finish(){
     skill='Not Yet Ready';
     steps=['We recommend completing a bookkeeping fundamentals course before reapplying.','Consider: QuickBooks Online Certification or an introductory accounting course.','You are welcome to reapply after completing targeted training.'];
   }
-  document.getElementById('rname').textContent=cName+' · '+cEmail+'  ·  '+cDate;
+  document.getElementById('rname').textContent=cName+' · '+cEmail+' · '+timeTaken+'  ·  '+cDate;
   show('s-results');
-  sendToBackend(correct, pct, skill, steps);
+  sendToBackend(correct, pct, skill, steps, timeTaken);
 }
 
 function show(id){
@@ -323,18 +328,18 @@ function show(id){
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
-function sendToBackend(score, pct, skill, steps){
+function sendToBackend(score, pct, skill, steps, timeTaken){
   const L=['A','B','C','D'];
   const summary=Qs.map(function(q,i){
     const chosen=sel[i]!==null?L[sel[i]]:'—';
     const result=sel[i]===q.ans?'✓ CORRECT':'✗ INCORRECT';
     return 'Q'+(i+1)+' ['+q.cat+']: Answered '+chosen+' | Correct: '+L[q.ans]+' | '+result;
   }).join('\n');
-
   const params={
     candidate_name: cName,
     candidate_email: cEmail,
     date_taken: cDate,
+    time_taken: timeTaken,
     assessment: 'GL Bookkeeping Foundations — Level 1',
     score: score,
     total: Qs.length,
@@ -344,7 +349,6 @@ function sendToBackend(score, pct, skill, steps){
     question_summary: summary,
     open_responses: ''
   };
-
   fetch(BACKEND_URL, {
     method: 'POST',
     mode: 'no-cors',
